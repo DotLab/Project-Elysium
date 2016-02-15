@@ -17,6 +17,10 @@ public class UiPopupController : MonoBehaviour, IInitable<UiPopupInfo>, IClickab
 
 	void Start () {
 		trans.sizeDelta = new Vector2(0, 0);
+
+		Init(new UiPopupInfo("TEST", "test", "GO", 100, () => {
+			DebugConsole.Log("GO");
+		}));
 	}
 
 	public void Init (UiPopupInfo info) {
@@ -27,11 +31,13 @@ public class UiPopupController : MonoBehaviour, IInitable<UiPopupInfo>, IClickab
 
 		ButtonUiTransform.sizeDelta = new Vector2(info.ButtonWidth, ButtonUiTransform.sizeDelta.y);
 		ButtonUiText.text = info.ButtonText;
+
+		trans.sizeDelta = new Vector2(0, 300);
 	}
 
 	public void OnClick () {
 		info.ButtonAction();
 
-
+		trans.sizeDelta = new Vector2(0, 0);
 	}
 }

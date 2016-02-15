@@ -29,7 +29,7 @@ public static class NetworkHttpLayer {
 		return true;
 	}
 
-	public static string GetUpdate () {
+	public static string GetUpdateUrl () {
 		DebugConsole.Log("Requesting Update Url...");
 
 		var bytes = HttpPoster.Post("update.php", Version);

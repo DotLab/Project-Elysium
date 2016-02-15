@@ -2,13 +2,17 @@
 using UnityEngine.UI;
 
 public class UiImageColorable : MonoBehaviour, IColorable {
-	public Image UiImage;
+	Image uiImage;
+
+	void Awake () {
+		uiImage = GetComponent<Image>();
+	}
 
 	public Color GetColor () {
-		return UiImage.color;
+		return uiImage.color;
 	}
 
 	public void SetColor (Color newColor) {
-		UiImage.color = newColor;
+		uiImage.color = newColor;
 	}
 }

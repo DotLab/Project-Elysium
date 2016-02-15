@@ -2,7 +2,7 @@
 using UnityEngine.SceneManagement;
 using System.Collections;
 
-public class WelcomeSceneMediator : MonoBehaviour {
+public class WelcomeSceneUiMediator : MonoBehaviour {
 	public const int MenuSceneIndex = 1;
 
 	public GameObject TrademarkSwapableGameObject;
@@ -15,6 +15,7 @@ public class WelcomeSceneMediator : MonoBehaviour {
 		public Sprite TrademarkSprite;
 		public Color BackgroundColor;
 	}
+
 	public TrademarkFrameInfo[] TrademarkFrameInfos;
 
 	ISwapable<Sprite> trademarkSwapable;

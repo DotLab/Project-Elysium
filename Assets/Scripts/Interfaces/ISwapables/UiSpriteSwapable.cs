@@ -2,51 +2,51 @@
 using UnityEngine.UI;
 
 public class UiSpriteSwapable : MonoBehaviour, ISwapable<Sprite> {
-	public EasingType swapEasingType = EasingType.Cubic;
-	public float swapDuration = 0.5f;
+	public EasingType TransitionEasingType = EasingType.Cubic;
+	public float TransitionDuration = 0.5f;
 
-	public Image mainUiImage;
-	public Image transitionUiImage;
+	public Image MainUiImage;
+	public Image TransitionUiImage;
 
-	float time;
+	float transitionTime;
 
 
 	public void Swap (Sprite newSprite) {
-		if (mainUiImage.sprite == newSprite || transitionUiImage.sprite == newSprite) {
+		if (MainUiImage.sprite == newSprite || TransitionUiImage.sprite == newSprite) {
 			return;
 		}
 
-		transitionUiImage.sprite = newSprite;
-		transitionUiImage.color = Color.clear;
-		time = 0;
+		TransitionUiImage.sprite = newSprite;
+		TransitionUiImage.color = Color.clear;
+		transitionTime = 0;
 	}
 
 	public void SilentSwap (Sprite newSprite) {
-		if (mainUiImage.sprite == newSprite || transitionUiImage.sprite == newSprite) {
+		if (MainUiImage.sprite == newSprite || TransitionUiImage.sprite == newSprite) {
 			return;
 		}
 
-		mainUiImage.sprite = newSprite;
+		MainUiImage.sprite = newSprite;
 	}
 
 	void Update () {
-		if (transitionUiImage.sprite == null) {
+		if (TransitionUiImage.sprite == null) {
 			return;
 		}
 
-		if (time < swapDuration) {
-			float easedStep = Easing.EaseInOut(time / swapDuration, swapEasingType);
-			mainUiImage.color = new Color(1, 1, 1, 1.0f - easedStep);
-			transitionUiImage.color = new Color(1, 1, 1, easedStep); 
+		if (transitionTime < TransitionDuration) {
+			float easedStep = Easing.EaseInOut(transitionTime / TransitionDuration, TransitionEasingType);
+			MainUiImage.color = new Color(1, 1, 1, 1.0f - easedStep);
+			TransitionUiImage.color = new Color(1, 1, 1, easedStep); 
 		} else {
-			mainUiImage.sprite = transitionUiImage.sprite;
-			mainUiImage.color = Color.white;
+			MainUiImage.sprite = TransitionUiImage.sprite;
+			MainUiImage.color = Color.white;
 
-			transitionUiImage.sprite = null;
-			transitionUiImage.color = Color.clear;
+			TransitionUiImage.sprite = null;
+			TransitionUiImage.color = Color.clear;
 			return;
 		}
 
-		time += Time.deltaTime;
+		transitionTime += Time.deltaTime;
 	}
 }
