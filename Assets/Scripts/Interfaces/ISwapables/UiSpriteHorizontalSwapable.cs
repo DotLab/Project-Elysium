@@ -2,59 +2,59 @@
 using UnityEngine.UI;
 
 public class UiSpriteHorizontalSwapable : MonoBehaviour, ISwapable<Sprite> {
-	public EasingType swapEasingType = EasingType.Cubic;
-	public float swapDuration = 0.5f;
+	public EasingType TransitionEasingType = EasingType.Cubic;
+	public float TransitionDuration = 0.5f;
 
-	public float startX;
-	public float endX;
+	public float StartX;
+	public float EndX;
 
-	public Image mainUiImage;
-	public Image transitionUiImage;
+	public Image MainUiImage;
+	public Image TransitionUiImage;
 
-	float time;
 	float y;
+	float transitionTime;
 
 
 	void Awake () {
-		y = mainUiImage.rectTransform.anchoredPosition.y;
+		y = MainUiImage.rectTransform.anchoredPosition.y;
 	}
 
 	public void Swap (Sprite newSprite) {
-		if (mainUiImage.sprite == newSprite || transitionUiImage.sprite == newSprite) {
+		if (MainUiImage.sprite == newSprite || TransitionUiImage.sprite == newSprite) {
 			return;
 		}
 
-		transitionUiImage.sprite = newSprite;
-		time = 0;
+		TransitionUiImage.sprite = newSprite;
+		transitionTime = 0;
 	}
 
 	public void SilentSwap (Sprite newSprite) {
-		if (mainUiImage.sprite == newSprite || transitionUiImage.sprite == newSprite) {
+		if (MainUiImage.sprite == newSprite || TransitionUiImage.sprite == newSprite) {
 			return;
 		}
 
-		mainUiImage.sprite = newSprite;
+		MainUiImage.sprite = newSprite;
 	}
 
 	void Update () {
-		if (transitionUiImage.sprite == null) {
+		if (TransitionUiImage.sprite == null) {
 			return;
 		}
 
-		if (time < swapDuration) {
-			float easedStep = Easing.EaseInOut(time / swapDuration, swapEasingType);
-			transitionUiImage.rectTransform.anchoredPosition = new Vector2(Mathf.Lerp(startX, endX, easedStep), y);
+		if (transitionTime < TransitionDuration) {
+			float easedStep = Easing.EaseInOut(transitionTime / TransitionDuration, TransitionEasingType);
+			TransitionUiImage.rectTransform.anchoredPosition = new Vector2(Mathf.Lerp(StartX, EndX, easedStep), y);
 
-			mainUiImage.color = new Color(1, 1, 1, 1.0f - easedStep);
+			MainUiImage.color = new Color(1, 1, 1, 1.0f - easedStep);
 		} else {
-			mainUiImage.sprite = transitionUiImage.sprite;
-			mainUiImage.color = new Color(1, 1, 1);
+			MainUiImage.sprite = TransitionUiImage.sprite;
+			MainUiImage.color = new Color(1, 1, 1);
 
-			transitionUiImage.rectTransform.anchoredPosition = new Vector2(startX, y);
-			transitionUiImage.sprite = null;
+			TransitionUiImage.rectTransform.anchoredPosition = new Vector2(StartX, y);
+			TransitionUiImage.sprite = null;
 			return;
 		}
 
-		time += Time.deltaTime;
+		transitionTime += Time.deltaTime;
 	}
 }

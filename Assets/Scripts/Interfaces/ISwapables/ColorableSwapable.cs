@@ -1,12 +1,10 @@
 ﻿using UnityEngine;
 
-public class ColorSwapable : MonoBehaviour, ISwapable<Color> {
-	public EasingType SwapEasingType = EasingType.Cubic;
-	public float SwapDuration = 0.5f;
+public class ColorableSwapable : MonoBehaviour, ISwapable<Color> {
+	public EasingType TransitionEasingType = EasingType.Cubic;
+	public float TransitionDuration = 0.5f;
 
-	public GameObject ColorableGameObject;
-
-	IColorable colorable;
+	protected IColorable colorable;
 
 	float transitionTime;
 	bool isSwaping;
@@ -15,7 +13,7 @@ public class ColorSwapable : MonoBehaviour, ISwapable<Color> {
 	Color dstColor;
 
 	void Awake () {
-		colorable = ColorableGameObject.GetComponent<IColorable>();
+		colorable = GetComponent<IColorable>();
 	}
 
 	public void Swap (Color newColor) {
@@ -43,8 +41,8 @@ public class ColorSwapable : MonoBehaviour, ISwapable<Color> {
 			return;
 		}
 
-		if (transitionTime < SwapDuration) {
-			float easedStep = Easing.EaseInOut(transitionTime / SwapDuration, SwapEasingType);
+		if (transitionTime < TransitionDuration) {
+			float easedStep = Easing.EaseInOut(transitionTime / TransitionDuration, TransitionEasingType);
 			colorable.SetColor(Color.Lerp(srcColor, dstColor, easedStep));
 		} else {
 			colorable.SetColor(dstColor);

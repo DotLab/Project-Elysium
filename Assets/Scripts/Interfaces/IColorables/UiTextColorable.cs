@@ -2,13 +2,17 @@
 using UnityEngine.UI;
 
 public class UiTextColorable : MonoBehaviour, IColorable {
-	public Text UiText;
+	Text uiText;
+
+	void Start () {
+		uiText = GetComponent<Text>();
+	}
 
 	public Color GetColor () {
-		return UiText.color;
+		return uiText.color;
 	}
 
 	public void SetColor (Color newColor) {
-		UiText.color = newColor;
+		uiText.color = newColor;
 	}
 }

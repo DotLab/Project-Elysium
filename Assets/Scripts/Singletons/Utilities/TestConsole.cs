@@ -2,11 +2,11 @@
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-public class Console : MonoBehaviour {
+public class TestConsole : MonoBehaviour {
 	static int maxLineCount;
 
 	static Text uiText;
-	static LinkedList<string> lines = new LinkedList<string>();
+	static readonly LinkedList<string> lines = new LinkedList<string>();
 
 	static string s;
 
@@ -24,16 +24,18 @@ public class Console : MonoBehaviour {
 
 	void FixedUpdate () {
 		ParseString();
-
-		uiText.text = s;
 	}
 
 	void Update () {
+		HandleInput();
+	}
+
+	static void HandleInput () {
 		foreach (var c in Input.inputString) {
 			if ((c == '\n' || c == '\r')) {
 				if (!string.IsNullOrEmpty(command)) {
 					Log();
-					ExecuteCommand(command.ToLower());
+					SplitCommand(command.ToLower());
 					command = "";
 				}
 				continue;
@@ -50,8 +52,8 @@ public class Console : MonoBehaviour {
 		}
 	}
 
-	static void ExecuteCommand (string s) {
-		var objects = s.Split((string[])null, System.StringSplitOptions.RemoveEmptyEntries);
+	static void SplitCommand (string str) {
+		var objects = str.Split((string[])null, System.StringSplitOptions.RemoveEmptyEntries);
 		var cmd = objects[0];
 
 		if (objects.Length > 1) {
@@ -80,8 +82,8 @@ public class Console : MonoBehaviour {
 			}
 		} catch (System.Exception e) {
 			DebugConsole.Log("Execution Unsuccessful.");
-			Refresh(e.Message);
-			Log();
+
+			RefreshLog(e.Message);
 		}
 	}
 
@@ -89,13 +91,20 @@ public class Console : MonoBehaviour {
 		switch (prms[0]) {
 		case "test":
 			NetworkHttpLayer.NetworkTest(prms[1]);
+
+			RefreshLog("Network Test Passed!");
 			break;
 		case "version":
-			NetworkHttpLayer.VersionCheck();
+			if (!NetworkHttpLayer.VersionCheck()) {
+				RefreshLog("Need Update!");
+			} else {
+				RefreshLog("No Update Available.");
+			}
 			break;
 		case "update":
 			if (!NetworkHttpLayer.VersionCheck()) {
-				Application.OpenURL(NetworkHttpLayer.GetUpdate());
+				RefreshLog("Need Update!");
+				Application.OpenURL(NetworkHttpLayer.GetUpdateUrl());
 			}
 			break;
 		default:
@@ -123,10 +132,17 @@ public class Console : MonoBehaviour {
 		Log("");
 	}
 
+	public static void RefreshLog (object o) {
+		Refresh(o);
+		Log();
+	}
+
 	static void ParseString () {
 		s = "";
 		foreach (var line in lines) {
 			s += line;
 		}
+
+		uiText.text = s;
 	}
 }
