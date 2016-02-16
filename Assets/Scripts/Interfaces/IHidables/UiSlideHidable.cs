@@ -2,8 +2,8 @@
 using System.Collections;
 
 public class UiSlideHidable : MonoBehaviour, IHidable {
-	public EasingType SlideEasingType = EasingType.Cubic;
-	public float SlideDuration = 1;
+	public EasingType TransitionEasingType = EasingType.Cubic;
+	public float TransitionDuration = 0.5f;
 
 	public bool LockX;
 	public float ShowX;
@@ -18,8 +18,11 @@ public class UiSlideHidable : MonoBehaviour, IHidable {
 
 	RectTransform trans;
 
+	Vector2 anchoredPosition;
+
 	void Awake () {
 		trans = GetComponent<RectTransform>();
+		anchoredPosition = trans.anchoredPosition;
 	}
 
 	void Start () {
@@ -61,11 +64,11 @@ public class UiSlideHidable : MonoBehaviour, IHidable {
 	IEnumerator Slide (float startX, float startY, float endX, float endY) {
 		float time = 0;
 
-		while (time < SlideDuration) {
-			var easedStep = Easing.EaseInOut(time / SlideDuration, SlideEasingType);
+		while (time < TransitionDuration) {
+			var easedStep = Easing.EaseInOut(time / TransitionDuration, TransitionEasingType);
 			trans.anchoredPosition = new Vector2(
-				LockX ? trans.anchoredPosition.x : Mathf.Lerp(startX, endX, easedStep),
-				LockY ? trans.anchoredPosition.y : Mathf.Lerp(startY, endY, easedStep));
+				LockX ? anchoredPosition.x : Mathf.Lerp(startX, endX, easedStep),
+				LockY ? anchoredPosition.y : Mathf.Lerp(startY, endY, easedStep));
 			
 			time += Time.deltaTime;
 			yield return null;

@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class UiPopupController : MonoBehaviour, IInitable<UiPopupInfo>, IClickable {
+	public RectTransform PopupUiTransform;
+
 	public Text TitleUiText;
 	public Text ContentUiText;
 
@@ -9,18 +12,13 @@ public class UiPopupController : MonoBehaviour, IInitable<UiPopupInfo>, IClickab
 	public Text ButtonUiText;
 
 	UiPopupInfo info;
-	RectTransform trans;
+
+	IHidable hidable;
+	IHidable popupHidable;
 
 	void Awake () {
-		trans = GetComponent<RectTransform>();
-	}
-
-	void Start () {
-		trans.sizeDelta = new Vector2(0, 0);
-
-		Init(new UiPopupInfo("TEST", "test", "GO", 100, () => {
-			DebugConsole.Log("GO");
-		}));
+		hidable = GetComponent<IHidable>();
+		popupHidable = PopupUiTransform.GetComponent<IHidable>();
 	}
 
 	public void Init (UiPopupInfo info) {
@@ -32,12 +30,24 @@ public class UiPopupController : MonoBehaviour, IInitable<UiPopupInfo>, IClickab
 		ButtonUiTransform.sizeDelta = new Vector2(info.ButtonWidth, ButtonUiTransform.sizeDelta.y);
 		ButtonUiText.text = info.ButtonText;
 
-		trans.sizeDelta = new Vector2(0, 300);
+		gameObject.SetActive(true);
+
+		hidable.Show();
+		popupHidable.Show();
 	}
 
 	public void OnClick () {
 		info.ButtonAction();
 
-		trans.sizeDelta = new Vector2(0, 0);
+		hidable.Hide();
+		popupHidable.Hide();
+
+		StartCoroutine(Deactivator());
+	}
+
+	IEnumerator Deactivator () {
+		yield return new WaitForSeconds(0.5f);
+
+		gameObject.SetActive(false);
 	}
 }

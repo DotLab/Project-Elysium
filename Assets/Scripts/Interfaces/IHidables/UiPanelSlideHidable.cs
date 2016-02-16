@@ -2,8 +2,8 @@
 using System.Collections;
 
 public class UiPanelSlideHidable : MonoBehaviour, IHidable {
-	public EasingType SlideEasingType = EasingType.Cubic;
-	public float SlideDuration = 1;
+	public EasingType TransitionEasingType = EasingType.Cubic;
+	public float TransitionDuration = 0.5f;
 
 	public Vector2 ShowMin;
 	public Vector2 ShowMax;
@@ -61,8 +61,8 @@ public class UiPanelSlideHidable : MonoBehaviour, IHidable {
 	IEnumerator Slide (Vector2 startMin, Vector2 startMax, Vector2 endMin, Vector2 endMax) {
 		float time = 0;
 
-		while (time < SlideDuration) {
-			var easedStep = Easing.EaseInOut(time / SlideDuration, SlideEasingType);
+		while (time < TransitionDuration) {
+			var easedStep = Easing.EaseInOut(time / TransitionDuration, TransitionEasingType);
 			trans.offsetMax = Vector2.Lerp(startMin, endMin, easedStep);
 			trans.offsetMin = Vector2.Lerp(startMax, endMax, easedStep);
 			
