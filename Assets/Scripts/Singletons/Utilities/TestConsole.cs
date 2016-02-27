@@ -6,143 +6,160 @@ public class TestConsole : MonoBehaviour {
 	static int maxLineCount;
 
 	static Text uiText;
-	static readonly LinkedList<string> lines = new LinkedList<string>();
-
-	static string s;
-
-	static string command;
+	static readonly LinkedList<string> textLines = new LinkedList<string>();
+	static string textString = "";
+	static string command = "";
 
 	void Awake () {
 		uiText = GetComponent<Text>();
-		maxLineCount = (int)(600.0f / uiText.fontSize);
+		maxLineCount = (int)(800.0f / uiText.fontSize);
 	}
 
 	void Start () {
-		Log("Console Started.");
-		Log();
+		WriteLine("Console started.");
 	}
 
 	void FixedUpdate () {
-		ParseString();
+		textString = "";
+		foreach (var line in textLines) {
+			textString += line + "\n";
+		}
+		textString += command;
+
+		uiText.text = textString;
 	}
 
 	void Update () {
-		HandleInput();
-	}
-
-	static void HandleInput () {
 		foreach (var c in Input.inputString) {
-			if ((c == '\n' || c == '\r')) {
+			if (c == '\n' || c == '\r') {
 				if (!string.IsNullOrEmpty(command)) {
-					Log();
-					SplitCommand(command.ToLower());
+					ProcessCommandString(command.ToLower());
 					command = "";
 				}
-				continue;
-			}
-
-			if (c == '\b') {
+			} else if (c == '\b') {
 				command = command.Length == 0 ? "" : command.Substring(0, command.Length - 1);
-				Refresh(command);
-				continue;
+			} else {
+				command += c;
 			}
-
-			command += c;
-			Refresh(command);
-		}
+		}	
 	}
 
-	static void SplitCommand (string str) {
-		var objects = str.Split((string[])null, System.StringSplitOptions.RemoveEmptyEntries);
-		var cmd = objects[0];
-
-		if (objects.Length > 1) {
-			var prms = new string[objects.Length - 1];
-			System.Array.Copy(objects, 1, prms, 0, objects.Length - 1);
-
-			ExecuteCommand(cmd, prms);
-		} else {
-			ExecuteCommand(cmd, (string[])null);
-		}
-	}
-
-	static void ExecuteCommand (string cmd, params string[] prms) {
-		DebugConsole.Log("Executing Command: " + cmd);
+	static void ProcessCommandString (string str) {
+		var items = str.Split((string[])null, System.StringSplitOptions.RemoveEmptyEntries);
+		var cmd = items[0];
+		DebugConsole.Log("cmd " + cmd);
+		WriteLine(str);
 
 		try {
 			switch (cmd) {
-			case "clear":
+			case "cls":
+				DebugConsole.Clear();
 				Clear();
 				break;
-			case "network":
-				ExecuteNetworkCommand(prms);
+			case "net":
+				ExecuteNetworkCommand(items);
 				break;
 			default:
-				throw new System.NotImplementedException("Unrecognizable Command: " + cmd);
+				throw new System.NotImplementedException("Command '" + cmd + "' not implemented.");
 			}
 		} catch (System.Exception e) {
-			DebugConsole.Log("Execution Unsuccessful.");
-
-			RefreshLog(e.Message);
+			DebugConsole.Log("<color=red>cmd " + cmd + " failed</color>");
+			WriteLine("Execution exited with <color=cyan>" + e.Message + "</color> at <color=yellow>" + e.TargetSite + "</color>");
 		}
 	}
 
-	static void ExecuteNetworkCommand (params string[] prms) {
-		switch (prms[0]) {
-		case "test":
-			NetworkHttpLayer.NetworkTest(prms[1]);
+	#region Commands Handlers
 
-			RefreshLog("Network Test Passed!");
+	static void ExecuteNetworkCommand (string[] prms) {
+		switch (prms[1]) {
+		case "test":
+			NetworkHttpLayer.NetworkTest(prms[2]);
+			WriteLine("Network test passed.");
 			break;
-		case "version":
+		case "ver":
 			if (!NetworkHttpLayer.VersionCheck()) {
-				RefreshLog("Need Update!");
+				WriteLine("Need update.");
 			} else {
-				RefreshLog("No Update Available.");
+				WriteLine("No update available.");
 			}
 			break;
-		case "update":
+		case "upd":
 			if (!NetworkHttpLayer.VersionCheck()) {
-				RefreshLog("Need Update!");
+				WriteLine("Need update, trying to download.");
 				Application.OpenURL(NetworkHttpLayer.GetUpdateUrl());
+			} else {
+				WriteLine("No update available.");
+			}
+			break;
+		case "cname":
+			if (NetworkHttpLayer.IsValidName(prms[2])) {
+				WriteLine("Valid User Name.");
+			} else {
+				WriteLine("Invalid User Name.");
+			}
+			break;
+		case "cmail":
+			if (NetworkHttpLayer.IsValidMail(prms[2])) {
+				WriteLine("Valid Email Address.");
+			} else {
+				WriteLine("Invalid Email Address.");
+			}
+			break;
+		case "cpass":
+			if (NetworkHttpLayer.IsValidPass(prms[2])) {
+				WriteLine("Valid Password.");
+			} else {
+				WriteLine("Invalid Password.");
+			}
+			break;
+		case "log":
+			if (NetworkHttpLayer.Login(prms[2], prms[3])) {
+				WriteLine("Login successful.");
+			} else {
+				WriteLine("Login failed.");
+			}
+			break;
+		case "reg":
+			if (NetworkHttpLayer.Register(prms[2], prms[3], prms[4])) {
+				WriteLine("Register successful.");
+			} else {
+				WriteLine("Register failed.");
+			}
+			break;
+		case "geti":
+			if (NetworkHttpLayer.GetInfo()) {
+				WriteLine("Info Got.");
+			} else {
+				WriteLine("Get failed.");
 			}
 			break;
 		default:
-			throw new System.NotImplementedException("Unrecognizable Network Parameter: " + prms[0]);
+			throw new System.NotImplementedException("Action '" + prms[1] + "' not implemented.");
 		}
 	}
 
+	#endregion
+
+	#region Console Implementation
+
 	static void Clear () {
-		lines.Clear();
-		Log();
+		textLines.Clear();
 	}
 
 	static void Refresh (object o) {
-		lines.Last.Value = o + "\n";
+		textLines.Last.Value = o.ToString();
 	}
 
-	public static void Log (object o) {
-		lines.AddLast(o + "\n");
-		while (lines.Count > maxLineCount) {
-			lines.RemoveFirst();
+	static void Write (object o) {
+		textLines.Last.Value += o.ToString();
+	}
+
+	static void WriteLine (object o = null) {
+		textLines.AddLast(o.ToString());
+		while (textLines.Count > maxLineCount) {
+			textLines.RemoveFirst();
 		}
 	}
 
-	public static void Log () {
-		Log("");
-	}
-
-	public static void RefreshLog (object o) {
-		Refresh(o);
-		Log();
-	}
-
-	static void ParseString () {
-		s = "";
-		foreach (var line in lines) {
-			s += line;
-		}
-
-		uiText.text = s;
-	}
+	#endregion
 }

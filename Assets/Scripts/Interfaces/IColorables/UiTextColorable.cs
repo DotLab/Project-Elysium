@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class UiTextColorable : MonoBehaviour, IColorable {
 	Text uiText;
 
-	void Start () {
+	void Awake () {
 		uiText = GetComponent<Text>();
 	}
 

@@ -30,9 +30,11 @@ public static class HttpPoster {
 			} else if (postObject is Char) {
 				postByteList.AddRange(BitConverter.GetBytes((Char)postObject));
 			} else if (postObject is String) {
-				postByteList.AddRange (Encoding.UTF8.GetBytes((String)postObject));
+				postByteList.AddRange(Encoding.UTF8.GetBytes((String)postObject));
+			} else if (postObject is Byte[]) {
+				postByteList.AddRange((Byte[])postObject);
 			} else {
-				throw new NotImplementedException();
+				throw new NotImplementedException("Type " + postObject.GetType() + " is not supported.");
 			}
 		}
 
@@ -44,7 +46,7 @@ public static class HttpPoster {
 
 		requestByteList.AddRange(postData);
 
-		Int32 unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime (1970, 1, 1))).TotalSeconds;
+		var unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
 		requestByteList.AddRange(BitConverter.GetBytes(unixTimestamp));
 
 		int hash = ComputeFnvHash(requestByteList.ToArray());
@@ -54,16 +56,16 @@ public static class HttpPoster {
 		webRequest.Proxy = null;
 		webRequest.Method = "POST";
 
-		DebugConsole.Log("Posting to " + UrlPrefix + url);
+		DebugConsole.Log("<color=white>-post " + UrlPrefix + url + "</color>");
 		using (Stream requestStream = webRequest.GetRequestStream()) {
 			requestStream.Write(requestByteList.ToArray(), 0, requestByteList.Count);
 		}
-		DebugConsole.Log("Bytes Sent: " + BitConverter.ToString(requestByteList.ToArray()));
+		DebugConsole.Log("-sent " + BitConverter.ToString(requestByteList.ToArray()));
 
 		byte[] responseData;
 		using (WebResponse webResponse = webRequest.GetResponse()) {
 			using (var responceStream = webResponse.GetResponseStream()) {
-				using (var bufferStream = new MemoryStream ()) {
+				using (var bufferStream = new MemoryStream()) {
 					int count;
 					var responseBuffer = new byte[256];
 					while (true) {
@@ -79,7 +81,9 @@ public static class HttpPoster {
 			}
 		}
 
-		DebugConsole.Log("Bytes Received: " + BitConverter.ToString(responseData));
+		DebugConsole.Log("-rece " + BitConverter.ToString(responseData));
+		DebugConsole.Log("-str " + Encoding.UTF8.GetString(responseData));
+
 		return responseData;
 	}
 

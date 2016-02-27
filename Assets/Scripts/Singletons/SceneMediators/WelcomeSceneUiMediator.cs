@@ -5,6 +5,8 @@ using System.Collections;
 public class WelcomeSceneUiMediator : MonoBehaviour {
 	public const int MenuSceneIndex = 1;
 
+	public GameObject OverlayGameObject;
+
 	public GameObject TrademarkSwapableGameObject;
 	public GameObject BackgroundSwapableGameObject;
 
@@ -18,10 +20,12 @@ public class WelcomeSceneUiMediator : MonoBehaviour {
 
 	public TrademarkFrameInfo[] TrademarkFrameInfos;
 
+	IHidable overlayHidable;
 	ISwapable<Sprite> trademarkSwapable;
 	ISwapable<Color> backgroundSwapable;
 
 	void Start () {
+		overlayHidable = OverlayGameObject.GetComponent<IHidable>();
 		trademarkSwapable = TrademarkSwapableGameObject.GetComponent<ISwapable<Sprite>>();
 		backgroundSwapable = BackgroundSwapableGameObject.GetComponent<ISwapable<Color>>();
 
@@ -36,10 +40,9 @@ public class WelcomeSceneUiMediator : MonoBehaviour {
 			yield return new WaitForSeconds(TrademarkStayTime);
 		}
 
-		StartGame();
-	}
+		overlayHidable.Show();
+		yield return new WaitForSeconds(0.5f);
 
-	static void StartGame () {
 		SceneManager.LoadScene(MenuSceneIndex);
 	}
 }

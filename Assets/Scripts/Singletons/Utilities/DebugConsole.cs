@@ -6,48 +6,51 @@ public class DebugConsole : MonoBehaviour {
 	static int maxLineCount;
 
 	static Text uiText;
-	static LinkedList<string> lines = new LinkedList<string>();
-
-	static string s;
+	static readonly LinkedList<string> textLines = new LinkedList<string>();
+	static string textString;
 
 	void Awake () {
 		uiText = GetComponent<Text>();
-		maxLineCount = (int)(600.0f / uiText.fontSize);
+		maxLineCount = (int)(800.0f / uiText.fontSize);
+	}
+
+	void Start () {
+		WriteLine("Console ready.");
 	}
 
 	void FixedUpdate () {
-		ParseString();
+		textString = "";
+		foreach (var line in textLines) {
+			textString += line + "\n";
+		}
 
-		uiText.text = s;
+		uiText.text = textString;
 	}
 
 	public static void Clear () {
-		lines.Clear();
+		textLines.Clear();
 	}
 
 	public static void Refresh (object o) {
 		Debug.Log(o);
-
-		lines.Last.Value = o + "\n";
+		textLines.Last.Value = o.ToString();
 	}
 
-	public static void Log (object o) {
+	public static void Write (object o) {
 		Debug.Log(o);
+		textLines.Last.Value += o.ToString();
+	}
 
-		lines.AddLast(o + "\n");
-		while (lines.Count > maxLineCount) {
-			lines.RemoveFirst();
+	public static void WriteLine (object o = null) {
+		Debug.Log(o);
+		textLines.AddLast(o.ToString());
+		while (textLines.Count > maxLineCount) {
+			textLines.RemoveFirst();
 		}
 	}
 
-	public static void Log () {
-		Log("");
-	}
-
-	static void ParseString () {
-		s = "";
-		foreach (var line in lines) {
-			s += line;
-		}
+	// Alias for WriteLine(object o)
+	public static void Log (object o = null) {
+		WriteLine(o);
 	}
 }
